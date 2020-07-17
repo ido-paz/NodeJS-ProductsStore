@@ -1,31 +1,68 @@
 const UsersDB = require("../models/UsersDB");
-const usersJson = require("../data/users.json");
 const User = require("../models/User");
+let express = require("express");
+let router = express.Router();
+let statusCodes = require("http-status-codes");
 //
-module.exports = class UsersControler {
-  //   constructor() {//not accessable from local functions
-  //     this.usersDB = new UsersDB(usersJson);
-  //   }
-  //
-  add(req, res, next) {
-    //let user = req.body;
-    let usersDB = new UsersDB(usersJson);
+router.get("/", (req, res, next) => {
+  let udb = new UsersDB();
+  udb
+    .getAll()
+    .then(function (data) {
+      res.json(data);
+    })
+    .catch((error) => {
+      next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+    });
+});
+
+router.get("/:name", (req, res, next) => {
+  let udb = new UsersDB();
+  udb
+    .get(req.params.name)
+    .then(function (data) {
+      res.json(data);
+    })
+    .catch((error) => {
+      next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
+    });
+});
+//
+router.post("/", (req, res, next) => {
+  if (req.body.name && req.body.password) {
     let user = new User(req.body.name, req.body.password);
-    usersDB.add(user);
-    res.send("added user");
-    return next();
+    let udb = new UsersDB();
+    udb
+      .add(user)
+      .then((user) => {
+        res
+          .status(statusCodes.CREATED)
+          .json(getJsonMessage(`user ${user.name} added`));
+      })
+      .catch((error) => {
+        next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+      });
+  } else {
+    next(getJsonMessage("invalid name or password", statusCodes.BAD_REQUEST));
   }
-  //
-  delete(req, res, next) {
-    //let user = req.body;
-    res.send("delete api");
-    return next();
-  }
-  //
-  get(req, res, next) {
-    //let user = req.body;
-    //res.send("get api");
-    res.json(new UsersDB(usersJson).get());
-    return next();
-  }
-};
+});
+
+router.delete("/", (req, res, next) => {
+  let udb = new UsersDB();
+  udb
+    .delete(req.body.name)
+    .then((user) => {
+      res.json(getJsonMessage(`user ${user.name} deleted`));
+    })
+    .catch((error) => {
+      next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+    });
+});
+//
+function getJsonMessage(message, statusCode) {
+  if (message.includes("not found")) statusCode = statusCodes.NOT_FOUND;
+  if (statusCode) return { message: message, statusCode: statusCode };
+  else return { message: message };
+}
+//
+module.exports = router;
