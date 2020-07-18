@@ -15,7 +15,7 @@ router.get("/", (req, res, next) => {
       next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
     });
 });
-
+//
 router.get("/:name", (req, res, next) => {
   let udb = new UsersDB();
   udb
@@ -46,7 +46,21 @@ router.post("/", (req, res, next) => {
     next(getJsonMessage("invalid name or password", statusCodes.BAD_REQUEST));
   }
 });
-
+//
+router.post("/login", (req, res, next) => {
+  if (req.body.name && req.body.password) {
+    let udb = new UsersDB();
+    udb
+      .login(req.body.name, req.body.password)
+      .then(() => {
+        res.json(getJsonMessage("authenticated"));
+      })
+      .catch((error) => {
+        next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
+      });
+  }
+});
+//
 router.delete("/", (req, res, next) => {
   let udb = new UsersDB();
   udb
@@ -60,9 +74,11 @@ router.delete("/", (req, res, next) => {
 });
 //
 function getJsonMessage(message, statusCode) {
-  if (message.includes("not found")) statusCode = statusCodes.NOT_FOUND;
-  if (statusCode) return { message: message, statusCode: statusCode };
-  else return { message: message };
+  if (statusCode) {
+    if (message && message.includes("not found"))
+      statusCode = statusCodes.NOT_FOUND;
+    return { message: message, statusCode: statusCode };
+  } else return { message: message };
 }
 //
 module.exports = router;

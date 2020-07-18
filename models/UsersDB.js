@@ -21,52 +21,57 @@ module.exports = class UsersDB {
       return new User(user.name, user.password);
     });
   }
-  //
-  add(user) {
-    return this.getAll().then((users) => {
+  async add(user) {
+    try {
+      let users = await this.getAll();
       users.push(user);
-      this.save(users);
+      await this.save(users);
       this.eventEmitter.emit("added", user);
-      return user;
-    });
+      return Promise.resolve(user);
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
   //
-  delete(name) {
-    this.eventEmitter.emit("delete", name);
-    return new Promise((resolve, reject) => {
-      this.getAll().then((users) => {
-        let userIndex = users.findIndex((u, i, users) => {
-          if (u.name === name) {
-            return true;
-          }
-          return false;
-        });
-        if (userIndex > -1) {
-          let user = users.splice(userIndex, 1);
-          this.save(users);
-          this.eventEmitter.emit("removed", name);
-          resolve(user[0]);
-        } else reject(new Error(`user ${name} not found`));
+  async delete(name) {
+    try {
+      this.eventEmitter.emit("delete", name);
+      let users = await this.getAll();
+      let userIndex = users.findIndex((u, i, users) => {
+        if (u.name === name) {
+          return true;
+        }
+        return false;
       });
-    });
+      if (userIndex > -1) {
+        let user = users.splice(userIndex, 1);
+        await this.save(users);
+        this.eventEmitter.emit("removed", name);
+        return Promise.resolve(user[0]);
+      } else return Promise.reject(new Error(`user ${name} not found`));
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
   //
-  get(name) {
+  async get(name) {
     this.eventEmitter.emit("get", name);
-    return this.getAll().then(function (users) {
-      //users = JSON.parse(users);
+    try {
+      let users = await this.getAll();
       let user = users.find((u, i) => {
         if (u.name == name) return u;
       });
       if (user) {
-        return user;
+        return Promise.resolve(user);
       } else {
-        throw new Error(`${name} not found`);
+        return Promise.reject(new Error(`${name} not found`));
       }
-    });
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
   //
-  getAll() {
+  async getAll() {
     this.eventEmitter.emit("getAll", null);
     return new Promise(function (resolve, reject) {
       fs.readFile(data_Json_Path, "utf8", (err, users) => {
@@ -80,22 +85,31 @@ module.exports = class UsersDB {
     });
   }
   //
-  save(users) {
+  async save(users) {
     if (users) this.users = users;
     if (this.users) {
-      fs.writeFile(data_Json_Path, JSON.stringify(this.users), (err) => {
-        if (err) throw err;
+      return new Promise((resolve, reject) => {
+        fs.writeFile(data_Json_Path, JSON.stringify(this.users), (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
     }
-    this.eventEmitter.emit("saved", this.users);
+    throw new Error("no users to save");
   }
   //
-  authenticate(name, password) {
-    if (this.users) {
-      let user = this.users.find((user, index, arr) => {
-        if (user.name == name && user.password == password) return true;
-      });
+  async login(name, password) {
+    try {
+      let users = await this.getAll();
+      if (users) {
+        let user = users.find((user, index, arr) => {
+          return user.name === name && user.password === password;
+        });
+        if (user) return Promise.resolve();
+        return Promise.reject(new Error(`invalid user name or password`));
+      }
+    } catch (error) {
+      return Promise.reject(error);
     }
-    return false;
   }
 };
