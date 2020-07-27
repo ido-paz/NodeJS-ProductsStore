@@ -1,8 +1,26 @@
-const UsersDB = require("../models/UsersDB");
 const User = require("../models/User");
 let express = require("express");
 let router = express.Router();
 let statusCodes = require("http-status-codes");
+//const UsersDB = require("../models/UsersDB_FS");
+const UsersDB = require("../models/UserDB_MSSQL");
+//
+router.get("/testDB", (req, res, next) => {
+  try {
+    let udb = new UsersDB();
+    udb
+      .hasConnection()
+      .then((data) => {
+        console.log("testDB");
+        res.json(getJsonMessage("connection to MSSQL DB is ok"));
+      })
+      .catch((error) => {
+        next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+      });
+  } catch (error) {
+    next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+  }
+});
 //
 router.get("/", (req, res, next) => {
   let udb = new UsersDB();
@@ -13,6 +31,18 @@ router.get("/", (req, res, next) => {
     })
     .catch((error) => {
       next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
+    });
+});
+//
+router.post("/login", (req, res, next) => {
+  let udb = new UsersDB();
+  udb
+    .login(req.body.name, req.body.password)
+    .then(() => {
+      res.json(getJsonMessage("authenticated"));
+    })
+    .catch((error) => {
+      next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
     });
 });
 //
@@ -44,20 +74,6 @@ router.post("/", (req, res, next) => {
       });
   } else {
     next(getJsonMessage("invalid name or password", statusCodes.BAD_REQUEST));
-  }
-});
-//
-router.post("/login", (req, res, next) => {
-  if (req.body.name && req.body.password) {
-    let udb = new UsersDB();
-    udb
-      .login(req.body.name, req.body.password)
-      .then(() => {
-        res.json(getJsonMessage("authenticated"));
-      })
-      .catch((error) => {
-        next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
-      });
   }
 });
 //
