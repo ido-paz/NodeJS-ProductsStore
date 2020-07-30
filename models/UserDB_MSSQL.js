@@ -1,8 +1,10 @@
 let sql = require("mssql");
+let ASPNET_MEMBERSHIP=require('../models/ASPNET_MEMBERSHIP');
+let crypto = require('crypto');
 const config = {
   user: "icastuser",
   password: "Dev12sql34",
-  server: "localhost", // You can use 'localhost\\instance' to connect to named instance
+  server: "172.16.1.55", // You can use 'localhost\\instance' to connect to named instance
   database: "icas2008r2",
   enableArithAbort: false,
 };
@@ -39,12 +41,37 @@ module.exports = class UserDB_MSSQL {
     throw Error("name is mandatory");
   }
   //
-  async login(name, password) {
-    if (name && name.length > 1 && password && password.length > 1) {
+  async getPasswordData(name) {
+    if (name && name.length > 1) {
       let user = await this.getData(
-        `select top 1 * from NetUsersProfile where email='${name}'`
+        `select top 1 * from aspnet_Membership where Email='${name}'`
       );
       if (user && user.length > 0) return user[0];
+      else throw Error(`user ${name} not found`);
+    }
+    throw Error("name is mandatory");
+  }
+  //
+  async login(name, password) {
+    if (password && password.length > 1) {  
+      let passwordData = await this.getPasswordData(name);
+      // let passwordData = await this.getData(
+      //   `select top 1 * from NetUsersProfile where email='${name}'`
+      // );
+      //if (user && user.length > 0) {
+      if (passwordData) {
+        //let aspNet_User = new ASPNET_MEMBERSHIP();
+        //let passwordData = aspNet_User.login(name,password);
+        const arrayBuffer = crypto.pbkdf2Sync(password, passwordData.PasswordSalt,
+                                      0,passwordData.PasswordSalt.length, 'sha1');
+        let  base64String = arrayBuffer.toString('base64');
+        //let base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        if(passwordData.Password===base64String)
+          return 'ok';
+          //return user[0];
+        else
+          throw Error("passwords dont match");
+      }
       else throw Error("user not found");
     }
     throw Error("invalid name or password");
