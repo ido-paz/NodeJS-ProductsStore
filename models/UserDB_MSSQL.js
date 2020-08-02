@@ -1,6 +1,5 @@
+let ASPNET_MEMBERSHIP = require('./ASPNET_MEMBERSHIP');
 let sql = require("mssql");
-let ASPNET_MEMBERSHIP=require('../models/ASPNET_MEMBERSHIP');
-let crypto = require('crypto');
 const config = {
   user: "icastuser",
   password: "Dev12sql34",
@@ -55,26 +54,32 @@ module.exports = class UserDB_MSSQL {
   async login(name, password) {
     if (password && password.length > 1) {  
       let passwordData = await this.getPasswordData(name);
-      // let passwordData = await this.getData(
-      //   `select top 1 * from NetUsersProfile where email='${name}'`
-      // );
-      //if (user && user.length > 0) {
       if (passwordData) {
-        //let aspNet_User = new ASPNET_MEMBERSHIP();
-        //let passwordData = aspNet_User.login(name,password);
-        const arrayBuffer = crypto.pbkdf2Sync(password, passwordData.PasswordSalt,
-                                      0,passwordData.PasswordSalt.length, 'sha1');
-        let  base64String = arrayBuffer.toString('base64');
-        //let base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        if(passwordData.Password===base64String)
+        let am = new ASPNET_MEMBERSHIP();
+        let passwordSHA1Hash = am.getSHA1Hash(password,passwordData.PasswordSalt);
+        if(passwordSHA1Hash===passwordData.Password)
           return 'ok';
-          //return user[0];
         else
           throw Error("passwords dont match");
       }
       else throw Error("user not found");
     }
     throw Error("invalid name or password");
+  }
+  //
+  getBase64String(text){
+    const data = atob(text);
+    return Uint8Array.from(data, b => b.charCodeAt(0));
+  }
+  //
+  getPaddedUnicodeBytes(text){
+    let byteCodes = [...text].map((item)=> item.charCodeAt(0));
+    let paddedByteCodes =[];
+    for (let index = 0; index < byteCodes.length; index++) {
+      paddedByteCodes.push(byteCodes[index]);
+      paddedByteCodes.push(0);
+    }
+    return paddedByteCodes;
   }
   //
   async add(user) {
