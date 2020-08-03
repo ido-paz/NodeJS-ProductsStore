@@ -1,5 +1,6 @@
 const User = require("../models/User");
 let express = require("express");
+const configJSON = require('../config.json');
 let router = express.Router();
 let statusCodes = require("http-status-codes");
 //const UsersDB = require("../models/UsersDB_FS");
@@ -40,6 +41,8 @@ router.post("/login", (req, res, next) => {
   udb
     .login(req.body.name, req.body.password)
     .then(() => {
+      privateKey = configJSON.jwtSecret;
+      var token = jwt.sign({userName:req.body.name}, privateKey, { algorithm: 'RS256'});
       res.json(getJsonMessage("authenticated"));
     })
     .catch((error) => {

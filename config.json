@@ -1,0 +1,9 @@
+{
+    "sqlOptions":{
+        "user":"icastuser",
+        "password":"Dev12sql34",
+        "server":"172.16.1.55",
+        "database":"icas2008r2"
+    },
+    "jwtSecret":"pita"
+}

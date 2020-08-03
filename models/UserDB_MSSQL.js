@@ -1,13 +1,7 @@
 let ASPNET_MEMBERSHIP = require('./ASPNET_MEMBERSHIP');
+const configJSON = require('../config.json');
 let sql = require("mssql");
-const config = {
-  user: "icastuser",
-  password: "Dev12sql34",
-  server: "172.16.1.55", // You can use 'localhost\\instance' to connect to named instance
-  database: "icas2008r2",
-  enableArithAbort: false,
-};
-
+//
 module.exports = class UserDB_MSSQL {
   constructor() {}
 
@@ -17,7 +11,7 @@ module.exports = class UserDB_MSSQL {
   //
   async getData(tSQL) {
     try {
-      let pool = await sql.connect(config);
+      let pool = await sql.connect(configJSON.sqlOptions);
       let result = await pool.request().query(tSQL);
       return Promise.resolve(result.recordset);
     } catch (error) {
