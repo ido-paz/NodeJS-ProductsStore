@@ -2,6 +2,7 @@ const express = require("express")();
 const bodyParser = require("body-parser");
 const usersControler = require("./controlers/UsersControler");
 const util = require("util");
+let statusCodes = require("http-status-codes");
 const port = 8080;
 //body parser setup
 express.use(bodyParser.json());
@@ -25,5 +26,7 @@ express.listen(port, () => {
 
 function logError(err, req, res, next) {
   console.error(err);
-  res.status(err.statusCode).json({ message: err.message });
+  let message = err.name ? err.name + ',' + err.message : err.message;
+  if (!err.statusCode) err.statusCode= statusCodes.INTERNAL_SERVER_ERROR;
+  res.status(err.statusCode).json({ message: message });
 }

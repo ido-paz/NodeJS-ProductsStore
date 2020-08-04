@@ -5,5 +5,9 @@
         "server":"172.16.1.55",
         "database":"icas2008r2"
     },
-    "jwtSecret":"pita"
+    "jwt":{
+        "secret":"pita",
+        "refreshSecret":"lafa",
+        "expiresIn":"15m"
+    }
 }

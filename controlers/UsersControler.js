@@ -1,11 +1,13 @@
 const User = require("../models/User");
-let express = require("express");
-const configJSON = require('../config.json');
-let router = express.Router();
-let statusCodes = require("http-status-codes");
+const express = require("express");
+const jwtAuthentication = require('../authentication/JWTAuthentication');
+const statusCodes = require("http-status-codes");
 //const UsersDB = require("../models/UsersDB_FS");
 const UsersDB = require("../models/UserDB_MSSQL");
-
+//
+const router = express.Router();
+//
+const vat =jwtAuthentication.verifyAccessToken;
 //
 router.get("/testDB", (req, res, next) => {
   try {
@@ -24,7 +26,7 @@ router.get("/testDB", (req, res, next) => {
   }
 });
 //
-router.get("/", (req, res, next) => {
+router.get("/", vat,(req, res, next) => {
   let udb = new UsersDB();
   udb
     .getAll()
@@ -36,21 +38,7 @@ router.get("/", (req, res, next) => {
     });
 });
 //
-router.post("/login", (req, res, next) => {
-  let udb = new UsersDB();
-  udb
-    .login(req.body.name, req.body.password)
-    .then(() => {
-      privateKey = configJSON.jwtSecret;
-      var token = jwt.sign({userName:req.body.name}, privateKey, { algorithm: 'RS256'});
-      res.json(getJsonMessage("authenticated"));
-    })
-    .catch((error) => {
-      next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
-    });
-});
-//
-router.get("/:name", (req, res, next) => {
+router.get("/:name", vat,(req, res, next) => {
   let udb = new UsersDB();
   udb
     .get(req.params.name)
@@ -62,7 +50,21 @@ router.get("/:name", (req, res, next) => {
     });
 });
 //
-router.post("/", (req, res, next) => {
+router.post("/login", (req, res, next) => {
+  let udb = new UsersDB();
+  udb
+    .login(req.body.name, req.body.password)
+    .then(() => {
+      let accessToken =jwtAuthentication.getAccessToken(req.body.name);
+      let refershToken = jwtAuthentication.getRefreshToken(req.body.name);
+      res.json({accessToken:accessToken,refershToken:refershToken});
+    })
+    .catch((error) => {
+      next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
+    });
+});
+//
+router.post("/", vat,(req, res, next) => {
   if (req.body.name && req.body.password) {
     let user = new User(req.body.name, req.body.password);
     let udb = new UsersDB();
@@ -81,7 +83,7 @@ router.post("/", (req, res, next) => {
   }
 });
 //
-router.delete("/", (req, res, next) => {
+router.delete("/", vat,(req, res, next) => {
   let udb = new UsersDB();
   udb
     .delete(req.body.name)

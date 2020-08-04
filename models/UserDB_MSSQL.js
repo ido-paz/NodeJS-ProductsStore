@@ -1,4 +1,4 @@
-let ASPNET_MEMBERSHIP = require('./ASPNET_MEMBERSHIP');
+let ASPNET_MEMBERSHIP = require('../authentication/ASPNET_MEMBERSHIP');
 const configJSON = require('../config.json');
 let sql = require("mssql");
 //
