@@ -2,12 +2,13 @@ const User = require("../models/User");
 const express = require("express");
 const jwtAuthentication = require('../authentication/JWTAuthentication');
 const statusCodes = require("http-status-codes");
+const helpers = require('../utils/Helpers');
 //const UsersDB = require("../models/UsersDB_FS");
 const UsersDB = require("../models/UserDB_MSSQL");
 //
 const router = express.Router();
-//
 const vat =jwtAuthentication.verifyAccessToken;
+const getJsonMessage = helpers.getJsonMessage;
 //
 router.get("/testDB", (req, res, next) => {
   try {
@@ -50,20 +51,6 @@ router.get("/:name", vat,(req, res, next) => {
     });
 });
 //
-router.post("/login", (req, res, next) => {
-  let udb = new UsersDB();
-  udb
-    .login(req.body.name, req.body.password)
-    .then(() => {
-      let accessToken =jwtAuthentication.getAccessToken(req.body.name);
-      let refershToken = jwtAuthentication.getRefreshToken(req.body.name);
-      res.json({accessToken:accessToken,refershToken:refershToken});
-    })
-    .catch((error) => {
-      next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
-    });
-});
-//
 router.post("/", vat,(req, res, next) => {
   if (req.body.name && req.body.password) {
     let user = new User(req.body.name, req.body.password);
@@ -94,13 +81,5 @@ router.delete("/", vat,(req, res, next) => {
       next(getJsonMessage(error.message, statusCodes.INTERNAL_SERVER_ERROR));
     });
 });
-//
-function getJsonMessage(message, statusCode) {
-  if (statusCode) {
-    if (message && message.includes("not found"))
-      statusCode = statusCodes.NOT_FOUND;
-    return { message: message, statusCode: statusCode };
-  } else return { message: message };
-}
 //
 module.exports = router;

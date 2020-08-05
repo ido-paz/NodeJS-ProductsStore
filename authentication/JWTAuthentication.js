@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const configJSON = require('../config.json');
 const statusCodes = require('http-status-codes');
+const Dictionary = require('../utils/Dictionary');
+//
+let refreshTokensDictionary = new Dictionary();
+module.exports.refreshTokens = refreshTokensDictionary;
 //
 module.exports.verifyAccessToken = function(req,res,next){
   let authHeader = req.headers["authorization"];
@@ -40,5 +44,7 @@ module.exports.getAccessToken = function(name){
 }
 //
 module.exports.getRefreshToken = function(name){
-  return jwt.sign({name:name},configJSON.jwt.refreshSecret);
+  let token = jwt.sign({name:name},configJSON.jwt.refreshSecret);
+  //refreshTokensDictionary.addItem(name,token);
+  return token;
 }

@@ -1,6 +1,7 @@
 const express = require("express")();
 const bodyParser = require("body-parser");
 const usersControler = require("./controlers/UsersControler");
+const AuthenticationControler = require('./controlers/AuthenticationControler');
 const util = require("util");
 let statusCodes = require("http-status-codes");
 const port = 8080;
@@ -15,6 +16,8 @@ express.use((req, res, next) => {
   );
   next();
 });
+//
+express.use("/", AuthenticationControler);
 //using handler for the specific route
 express.use("/users", usersControler);
 //global error handler

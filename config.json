@@ -8,6 +8,6 @@
     "jwt":{
         "secret":"pita",
         "refreshSecret":"lafa",
-        "expiresIn":"15m"
+        "expiresIn":"1m"
     }
 }
