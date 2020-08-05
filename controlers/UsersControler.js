@@ -27,10 +27,16 @@ router.get("/testDB", (req, res, next) => {
   }
 });
 //
-router.get("/", vat,(req, res, next) => {
+router.get("/like/:name", vat,(req, res, next) => {
+  let name = req.params.name;
+  let condition;
+  if (name) 
+      condition = helpers.getCondition('email','like',"'%" + name + "%'");
+  else
+      throw Error('invalid parameter');
   let udb = new UsersDB();
   udb
-    .getAll()
+    .getBy(condition)
     .then(function (data) {
       res.json(data);
     })
@@ -39,10 +45,20 @@ router.get("/", vat,(req, res, next) => {
     });
 });
 //
-router.get("/:name", vat,(req, res, next) => {
+router.get("/:parameter", vat,(req, res, next) => {
+  let parameter = req.params.parameter;
+  let condition;
+  if (parameter) {
+      if (isNaN(parameter)) 
+          condition = helpers.getCondition('email','=',"'" + parameter + "'");
+      else
+          condition = helpers.getCondition('userID','=',parameter);            
+  }  
+  else
+      throw Error('invalid parameter');
   let udb = new UsersDB();
   udb
-    .get(req.params.name)
+    .getBy(condition)
     .then(function (data) {
       res.json(data);
     })

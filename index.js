@@ -1,6 +1,7 @@
 const express = require("express")();
 const bodyParser = require("body-parser");
 const usersControler = require("./controlers/UsersControler");
+const productsControler = require("./controlers/ProductsControler");
 const AuthenticationControler = require('./controlers/AuthenticationControler');
 const util = require("util");
 let statusCodes = require("http-status-codes");
@@ -20,6 +21,7 @@ express.use((req, res, next) => {
 express.use("/", AuthenticationControler);
 //using handler for the specific route
 express.use("/users", usersControler);
+express.use("/products", productsControler);
 //global error handler
 express.use(logError);
 //starting to listen

@@ -7,3 +7,9 @@ module.exports.getJsonMessage = function(message, statusCode) {
       return { message: message, statusCode: statusCode };
     } else return { message: message };
   }
+//
+module.exports.getCondition = function(variableName,operator,value){    
+    if (variableName && operator &&value) 
+        return `${variableName} ${operator} ${value}`;
+    throw Error('invalid variableName || operator || value');
+}
