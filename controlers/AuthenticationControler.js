@@ -4,7 +4,7 @@ const jwtAuthentication = require('../authentication/JWTAuthentication');
 const statusCodes = require("http-status-codes");
 const helpers = require('../utils/Helpers');
 //const UsersDB = require("../models/UsersDB_FS");
-const UsersDB = require("../models/UserDB_MSSQL");
+const UsersDB = require("../models/NetUsersProfile");
 //
 const router = express.Router();
 //

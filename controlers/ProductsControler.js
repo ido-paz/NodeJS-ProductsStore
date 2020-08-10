@@ -26,6 +26,7 @@ router.get("/:paramter", (req, res, next) => {
       .getBy(condition)
       .then(function (data) {
         res.json(data);
+        next();
       })
       .catch((error) => {
         next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
@@ -45,6 +46,7 @@ router.get("/like/:paramter", (req, res, next) => {
       .getBy(condition)
       .then(function (data) {
         res.json(data);
+        next();
       })
       .catch((error) => {
         next(getJsonMessage(error.message, statusCodes.NOT_FOUND));

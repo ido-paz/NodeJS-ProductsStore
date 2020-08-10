@@ -4,16 +4,19 @@ const usersControler = require("./controlers/UsersControler");
 const productsControler = require("./controlers/ProductsControler");
 const AuthenticationControler = require('./controlers/AuthenticationControler');
 const util = require("util");
-let statusCodes = require("http-status-codes");
+const statusCodes = require("http-status-codes");
 const port = 8080;
+let requestID = 0;
 //body parser setup
 express.use(bodyParser.json());
 express.use(bodyParser.urlencoded({ extended: true }));
-// express.use(bodyParser.json);
+//
 express.use((req, res, next) => {
-  //util.log(`started ${req.method} request for url ${req.url} `);
+  requestID++;
+  req.startDate = new Date();
+  req.requestID = requestID;
   util.log(
-    `started ${req.method} request for url ${req.url} ,file handler ${__filename}`
+    `request id ${requestID} , started ${req.method} request for url ${req.url}`
   );
   next();
 });
@@ -24,6 +27,15 @@ express.use("/users", usersControler);
 express.use("/products", productsControler);
 //global error handler
 express.use(logError);
+//
+//
+express.use((req, res, next) => {
+  let durationMS = new Date().getTime() - req.startDate.getTime();
+  util.log(
+    `request id ${req.requestID} , ended ${req.method} request for url ${req.url}, the request took ${durationMS}ms`
+  );
+  next();
+});
 //starting to listen
 express.listen(port, () => {
   util.log(`listening on port ${port}`);
