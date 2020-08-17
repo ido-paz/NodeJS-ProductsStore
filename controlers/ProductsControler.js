@@ -25,8 +25,11 @@ router.get("/:paramter", (req, res, next) => {
     db
       .getBy(condition)
       .then(function (data) {
-        res.json(data);
-        next();
+        if (condition) {
+          res.json(data);
+          next();  
+        }else
+          next(getJsonMessage('product not found', statusCodes.NOT_FOUND));
       })
       .catch((error) => {
         next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
@@ -45,8 +48,11 @@ router.get("/like/:paramter", (req, res, next) => {
     db
       .getBy(condition)
       .then(function (data) {
-        res.json(data);
-        next();
+        if (data && data.length>0) {
+          res.json(data);
+          next();  
+        }else
+          next(getJsonMessage('product not found', statusCodes.NOT_FOUND));      
       })
       .catch((error) => {
         next(getJsonMessage(error.message, statusCodes.NOT_FOUND));
