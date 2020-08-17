@@ -11,6 +11,12 @@ let requestID = 0;
 express.use(bodyParser.json());
 express.use(bodyParser.urlencoded({ extended: true }));
 //
+express.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+//
 express.use((req, res, next) => {
   requestID++;
   req.startDate = new Date();
@@ -27,7 +33,6 @@ express.use("/users", usersControler);
 express.use("/products", productsControler);
 //global error handler
 express.use(logError);
-//
 //
 express.use((req, res, next) => {
   let durationMS = new Date().getTime() - req.startDate.getTime();
