@@ -2,6 +2,7 @@ const express = require("express")();
 const bodyParser = require("body-parser");
 const usersControler = require("./controlers/UsersControler");
 const productsControler = require("./controlers/ProductsControler");
+const categoriesControler = require('./controlers/CategoriesControler');
 const AuthenticationControler = require('./controlers/AuthenticationControler');
 const util = require("util");
 const statusCodes = require("http-status-codes");
@@ -31,6 +32,7 @@ express.use("/", AuthenticationControler);
 //using handler for the specific route
 express.use("/users", usersControler);
 express.use("/products", productsControler);
+express.use("/categories", categoriesControler);
 //global error handler
 express.use(logError);
 //
