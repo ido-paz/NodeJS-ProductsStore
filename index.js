@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const usersControler = require("./controlers/UsersControler");
 const productsControler = require("./controlers/ProductsControler");
 const categoriesControler = require("./controlers/CategoriesControler");
-const booksCategoriesControler = require("./controlers/BooksCategoriesControler");
+const categoryBooksControler = require("./controlers/CategoryBooksControler");
 const AuthenticationControler = require("./controlers/AuthenticationControler");
 const util = require("util");
 const statusCodes = require("http-status-codes");
@@ -37,7 +37,7 @@ express.use("/", AuthenticationControler);
 express.use("/users", usersControler);
 express.use("/products", productsControler);
 express.use("/categories", categoriesControler);
-express.use("/booksCategories", booksCategoriesControler);
+express.use("/categoryBooks", categoryBooksControler);
 //global error handler
 express.use(logError);
 //
